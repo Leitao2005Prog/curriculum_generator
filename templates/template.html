@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ full_name }}</title>
+  <link rel="stylesheet" href="../static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+rel="stylesheet"
+href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap">
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>{{ full_name }}</h1>
+      </div>
+
+      <div class="topbar-right">
+        <div class="contact-line">{{ address | join(', ') }}</div>
+        <div class="contact-line">{{ email }}</div>
+        <div class="contact-line">{{ web }}</div>
+        <div class="contact-line">{{ linkedin }}</div>
+        <div class="contact-line">{{ github }}</div>
+      </div>
+    </header>
+
+    <section class="headline">
+      <p>
+        {% if description_paragraphs and description_paragraphs|length > 0 %}
+          {{ description_paragraphs[0] }}
+        {% else %}
+          Desenvolvedor fascinado pela Computação, movido pela busca diária de soluções inovadoras.
+        {% endif %}
+      </p>
+    </section>
+
+    <main class="layout">
+      <section class="left-column">
+        <h2>Competências Técnicas</h2>
+
+        <div class="competency-grid">
+          {% for group in competency_blocks %}
+          <div class="competency-block">
+            <h3>{{ group.title }}</h3>
+            <ul>
+             {% for item in group["items"] %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="right-column">
+        <h2>Experiências</h2>
+
+        {% for section in body_sections %}
+          {% if section.name == "Experience" %}
+            {% for entry in section.entries %}
+            <article class="entry">
+              <div class="entry-header">
+                <h3>{{ entry.title }}{% if entry.company %} — {{ entry.company }}{% endif %}</h3>
+                <div class="entry-date">
+                  {% if entry.start %}{{ entry.start }}{% endif %}
+                  {% if entry.end and entry.end != entry.start %} — {{ entry.end }}{% endif %}
+                </div>
+              </div>
+
+              {% if entry.description_items and entry.description_items|length > 0 %}
+              <ul class="entry-description">
+                {% for item in entry.description_items %}
+                  {{ item }}{% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+              </ul>
+              {% else %}
+              <ul class="entry-description">
+                {% for p in entry.description_paragraphs %}
+                  {{ p }}{% if not loop.last %}<br><br>{% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </article>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+
+        <h2 class="education-title">Formações Acadêmicas</h2>
+
+        {% for section in body_sections %}
+          {% if section.name == "Education" %}
+            {% for entry in section.entries %}
+        <article class="education-entry">
+
+        <div class="education-title">
+            {{ entry.title }}
+        </div>
+
+        <div class="education-meta">
+            {% if entry.company %}
+            <span class="education-company">
+                {{ entry.company }}
+            </span>
+            {% endif %}
+
+            {% if entry.company and entry.start %}
+            <span class="education-separator">|</span>
+            {% endif %}
+
+            {% if entry.start %}
+            <span class="education-date">
+                {{ entry.start }}
+                {% if entry.end and entry.end != entry.start %}
+                — {{ entry.end }}
+                {% endif %}
+            </span>
+            {% endif %}
+        </div>
+
+        {% if entry.description %}
+            <p class="education-description">
+            {{ entry.description }}
+            </p>
+        {% endif %}
+
+        </article>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </section>
+    </main>
+  </div>
+</body>
+</html>
