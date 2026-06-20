@@ -67,33 +67,74 @@ def build_competency_blocks(data):
           - title: Web / Automação
             items: [...]
 
-    Não há mais hardcode aqui: para adicionar, remover ou renomear um
+    Não há hardcode aqui: para adicionar, remover ou renomear um
     grupo/skill, edite apenas o master_resume.yaml.
-
-    Mantém compatibilidade com o formato antigo (lista simples de strings)
-    agrupando tudo em um único bloco "Competências", caso alguém ainda
-    use `keyskills: [Python, Excel, ...]`.
     """
     raw = data.get("keyskills", []) or []
+    blocks = []
+    for group in raw:
+        if not isinstance(group, dict):
+            continue
+        title = (group.get("title") or "").strip()
+        items = [item for item in (group.get("items") or []) if item]
+        if title and items:
+            blocks.append({"title": title, "items": items})
+    return blocks
 
-    if not raw:
-        return []
 
-    # Formato novo: lista de dicts {title, items}
-    if isinstance(raw[0], dict):
-        blocks = []
-        for group in raw:
-            title = group.get("title", "").strip()
-            items = [item for item in (group.get("items") or []) if item]
-            if title and items:
-                blocks.append({"title": title, "items": items})
-        return blocks
+# Ícones SVG monocromáticos (herdam a cor do texto via fill="currentColor"),
+# estilo outline simples, viewBox 24x24 — fáceis de colorir em branco no CSS
+# (.contact-icon { color: #fff; }) sem precisar trocar o markup.
+CONTACT_ICONS = {
+    "address": '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s-7-7.2-7-12a7 7 0 1 1 14 0c0 4.8-7 12-7 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>',
+    "phone": '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 10.8c1.3 2.6 3.4 4.7 6 6l2-2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.9c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1l-2 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    "email": '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "linkedin": '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6.94 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM3.2 8.75h3.5V21H3.2V8.75ZM9.5 8.75h3.35v1.68h.05c.47-.88 1.6-1.8 3.3-1.8 3.53 0 4.18 2.32 4.18 5.35V21h-3.5v-5.66c0-1.35-.02-3.08-1.88-3.08-1.88 0-2.17 1.47-2.17 2.98V21H9.5V8.75Z"/></svg>',
+    "github": '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.61-3.37-1.21-3.37-1.21-.46-1.18-1.11-1.5-1.11-1.5-.91-.63.07-.62.07-.62 1 .07 1.53 1.04 1.53 1.04.89 1.55 2.34 1.1 2.91.84.09-.66.35-1.1.63-1.36-2.22-.26-4.56-1.13-4.56-5.03 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.04a9.3 9.3 0 0 1 5 0c1.91-1.31 2.75-1.04 2.75-1.04.55 1.41.2 2.45.1 2.71.64.71 1.03 1.62 1.03 2.73 0 3.91-2.34 4.77-4.57 5.02.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.2C22 6.58 17.52 2 12 2Z"/></svg>',
+}
 
-    # Formato antigo: lista simples de strings -> um único bloco
-    items = [s for s in raw if s]
-    if not items:
-        return []
-    return [{"title": "Competências", "items": items}]
+
+def build_contacts(ctx):
+    """
+    Monta a lista de itens de contato exibidos na barra superior, cada um
+    com {key, icon (svg), text, href (opcional)}.
+
+    Apenas LinkedIn e GitHub viram hyperlink, e a URL é sempre exibida por
+    extenso (nunca abreviada) para evitar ambiguidade no link. Os demais
+    (endereço, telefone, email) mostram só ícone + texto, sem link.
+
+    Itens sem valor no YAML são omitidos automaticamente.
+    """
+    contacts = []
+
+    address = ctx.get("address")
+    if isinstance(address, list):
+        address_text = ", ".join(a for a in address if a)
+    else:
+        address_text = address or ""
+    if address_text:
+        contacts.append({"key": "address", "icon": CONTACT_ICONS["address"], "text": address_text, "href": None})
+
+    phone = ctx.get("phone")
+    if phone:
+        contacts.append({"key": "phone", "icon": CONTACT_ICONS["phone"], "text": phone, "href": None})
+
+    email = ctx.get("email")
+    if email:
+        contacts.append({"key": "email", "icon": CONTACT_ICONS["email"], "text": email, "href": None})
+
+    linkedin = ctx.get("linkedin")
+    if linkedin:
+        # Aceita tanto "in/usuario" quanto a URL completa já pronta no YAML.
+        href = linkedin if linkedin.startswith("http") else f"https://www.linkedin.com/{linkedin.lstrip('/')}"
+        contacts.append({"key": "linkedin", "icon": CONTACT_ICONS["linkedin"], "text": href, "href": href})
+
+    github = ctx.get("github")
+    if github:
+        href = github if github.startswith("http") else f"https://github.com/{github.lstrip('/')}"
+        contacts.append({"key": "github", "icon": CONTACT_ICONS["github"], "text": href, "href": href})
+
+    return contacts
 
 
 def build_body_sections(body):
@@ -127,13 +168,7 @@ def prepare_context(data):
     ctx["description_paragraphs"] = split_description(ctx.get("description", ""))
     ctx["competency_blocks"] = build_competency_blocks(ctx)
     ctx["body_sections"] = build_body_sections(ctx.get("body", {}))
-
-    # Garante que campos de contato opcionais nunca cheguem como None
-    # ao template (evita "None" literal aparecendo no HTML, já que o
-    # template não usa `is defined`/`default` nesses campos).
-    for key in ("linkedin", "github", "email", "web"):
-        if ctx.get(key) is None:
-            ctx[key] = ""
+    ctx["contacts"] = build_contacts(ctx)
 
     return ctx
 

@@ -20,11 +20,16 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
       </div>
 
       <div class="topbar-right">
-        <div class="contact-line">{{ address | join(', ') }}</div>
-        <div class="contact-line">{{ email }}</div>
-        <div class="contact-line">{{ web }}</div>
-        <div class="contact-line">{{ linkedin }}</div>
-        <div class="contact-line">{{ github }}</div>
+        {% for c in contacts %}
+        <div class="contact-line">
+          <span class="contact-icon">{{ c.icon | safe }}</span>
+          {% if c.href %}
+          <a href="{{ c.href }}" target="_blank" rel="noopener">{{ c.text }}</a>
+          {% else %}
+          <span>{{ c.text }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
       </div>
     </header>
 
