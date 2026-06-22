@@ -2,6 +2,14 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Fallback caso a variável inline não seja aplicada por algum motivo.
+     render.py injeta os valores reais via style inline em .page,
+     calculados em src/page_check.py (compute_density). */
+  --density-experience: 1;
+  --density-side: 1;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -15,11 +23,28 @@ body {
 }
 
 .page {
-  width: 591px;
-  min-height: 849px;
+  width: 210mm;
+  height: 297mm;
   margin: 0 auto;
   background: #fff;
   overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Indicador de overflow: se o conteúdo estourar a altura do A4, uma faixa
+   vermelha aparece na borda inferior da página (só na tela, não imprime).
+   Ajuda a perceber visualmente quando algo precisa ser cortado/reduzido,
+   em vez de o texto simplesmente sumir cortado pelo overflow:hidden. */
+.page::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: transparent;
 }
 .topbar {
   display: grid;
@@ -44,6 +69,15 @@ body {
   text-transform: uppercase;
   max-width: 320px;
   white-space: normal;
+}
+
+.headline-title {
+  margin-top: 8px;
+  font-size: 11pt;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.82);
+  text-transform: uppercase;
 }
 
 .topbar-right {
@@ -103,8 +137,8 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: 28px;
+  grid-template-columns: 1.9fr 1fr;
+  gap: 24px;
   padding: 12px 18px 18px 18px;
 }
 
@@ -125,18 +159,17 @@ h2 {
   min-width: 0;
   padding-left: 18px;
   border-left: 1px solid #d8d8d8;
-  margin: 0 0 0 50px;
 }
 
 .competency-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: calc(16px * var(--density-side));
 }
 
 .competency-block h3 {
   margin: 0 0 6px 0;
-  font-size: 8pt;
+  font-size: 12pt;
   line-height: 1.1;
   font-weight: 800;
 }
@@ -150,7 +183,7 @@ h2 {
 .competency-block li {
   font-size: 10pt;
   line-height: 1.35;
-  margin: 0 0 3px 0;
+  margin: 0 0 calc(3px * var(--density-side)) 0;
   position: relative;
   padding-left: 12px;
 }
@@ -163,7 +196,7 @@ h2 {
 }
 
 .entry {
-  margin-bottom: 18px;
+  margin-bottom: calc(18px * var(--density-experience));
 }
 
 .entry-header {
@@ -190,11 +223,9 @@ h2 {
 
 .entry-description {
   text-align: justify;
-  line-height: 1.45;
-  margin: 10px 0 0 0;
+  line-height: calc(1.28 * var(--density-experience));
+  margin: calc(10px * var(--density-experience)) 0 0 0;
   font-size: 9.4pt;
-  line-height: 1.28;
-  text-align: justify;
   list-style:none;
   padding-left:0;
 }
@@ -202,6 +233,11 @@ h2 {
 .entry-description li {
   position: relative;
   padding-left: 12px;
+  margin-bottom: calc(4px * var(--density-experience));
+}
+
+.entry-description li:last-child {
+  margin-bottom: 0;
 }
 
 .entry-description li::before {
@@ -247,7 +283,7 @@ h2 {
 }
 
 .extra-education {
-  margin-top: 14px;
+  margin-top: calc(14px * var(--density-side));
 }
 
 .extra-education-label {
@@ -262,7 +298,7 @@ h2 {
 .extra-education-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: calc(6px * var(--density-side));
 }
 
 .extra-education-tag {
@@ -282,7 +318,12 @@ h2 {
   }
 
   .page {
-    width: 591px;
-    min-height: 849px;
+    width: 210mm;
+    height: 297mm;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
   }
 }

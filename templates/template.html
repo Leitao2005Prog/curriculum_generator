@@ -13,10 +13,13 @@ rel="stylesheet"
 href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap">
 </head>
 <body>
-  <div class="page">
+  <div class="page" style="--density-experience: {{ density.experience if density else 1.0 }}; --density-side: {{ density.side if density else 1.0 }};">
     <header class="topbar">
       <div class="topbar-left">
         <h1>{{ full_name }}</h1>
+        {% if headline_title %}
+        <div class="headline-title">{{ headline_title }}</div>
+        {% endif %}
       </div>
 
       <div class="topbar-right">
@@ -62,13 +65,13 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
               {% if entry.description_items and entry.description_items|length > 0 %}
               <ul class="entry-description">
                 {% for item in entry.description_items %}
-                  {{ item }}{% if not loop.last %}<br>{% endif %}
+                <li>{{ item }}</li>
                 {% endfor %}
               </ul>
               {% else %}
               <ul class="entry-description">
                 {% for p in entry.description_paragraphs %}
-                  {{ p }}{% if not loop.last %}<br><br>{% endif %}
+                <li>{{ p }}</li>
                 {% endfor %}
               </ul>
               {% endif %}
@@ -95,15 +98,18 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
             </span>
             {% endif %}
 
-            {% if entry.company and entry.start %}
+            {% if entry.company and (entry.start or entry.end) %}
             <span class="education-separator">|</span>
             {% endif %}
 
-            {% if entry.start %}
+            {% if entry.start or entry.end %}
             <span class="education-date">
+                {% if entry.start and entry.end and entry.end != entry.start %}
+                {{ entry.start }} — {{ entry.end }}
+                {% elif entry.start %}
                 {{ entry.start }}
-                {% if entry.end and entry.end != entry.start %}
-                — {{ entry.end }}
+                {% else %}
+                {{ entry.end }}
                 {% endif %}
             </span>
             {% endif %}

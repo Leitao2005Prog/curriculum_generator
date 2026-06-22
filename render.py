@@ -10,6 +10,7 @@ ordem das chamadas. Veja:
     src/contacts.py   -> lista de contatos (usa src/icons.py)
     src/icons.py      -> registro de ícones SVG por tipo de contato
     src/text_utils.py -> utilitários de texto (parágrafos/bullets)
+    src/page_check.py -> estimativa de overflow de página A4
 """
 import sys
 from pathlib import Path
@@ -27,6 +28,7 @@ sys.path.insert(0, str(SRC_DIR))
 from yaml_io import load_yaml, resolve_placeholders  # noqa: E402
 from selection import apply_selection  # noqa: E402
 from context import prepare_context  # noqa: E402
+from page_check import check_overflow, print_overflow_warning, compute_density  # noqa: E402
 
 MASTER_RESUME = INPUT_DIR / "master_resume.yaml"
 SELECTION = INPUT_DIR / "selection.yaml"
@@ -45,6 +47,23 @@ def main():
 
     filtered = apply_selection(master, selection)
     context = prepare_context(filtered)
+
+    estimated_mm, usable_mm, overflow = check_overflow(
+        context["body_sections"], context.get("extra_education")
+    )
+    if overflow:
+        print_overflow_warning(estimated_mm, usable_mm)
+
+    density = compute_density(
+        context["body_sections"],
+        context.get("extra_education"),
+        context["competency_blocks"],
+    )
+    context["density"] = density
+    print(
+        f"[page_check] densidade calculada: experience={density['experience']} "
+        f"side={density['side']} (1.0 = espaçamento normal)"
+    )
 
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
