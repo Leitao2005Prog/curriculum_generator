@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+<script src="static/script.js"></script>   
 <link
 rel="stylesheet"
 href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap">
@@ -31,6 +31,16 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
           {% else %}
           <span>{{ c.text }}</span>
           {% endif %}
+          {% if c.key == "email" %}
+          <button
+            type="button"
+            class="copy-email-btn"
+            data-email="{{ c.text }}"
+            title="Copiar email"
+            onclick="copyEmailToClipboard(this)"
+          >copiar</button>
+          <span class="copy-email-feedback" aria-live="polite"></span>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -41,7 +51,7 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
         {% if description_paragraphs and description_paragraphs|length > 0 %}
           {{ description_paragraphs[0] }}
         {% else %}
-          Desenvolvedor fascinado pela Computação, movido pela busca diária de soluções inovadoras.
+          Lorem Ipsum
         {% endif %}
       </p>
     </section>
@@ -80,47 +90,29 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
           {% endif %}
         {% endfor %}
 
-        <h2 class="education-title">Formações Acadêmicas</h2>
+        <h2 class="h2">Formações Acadêmicas</h2>
 
         {% for section in body_sections %}
           {% if section.name == "Education" %}
             {% for entry in section.entries %}
         <article class="education-entry">
-
-        <div class="education-title">
-            {{ entry.title }}
-        </div>
-
-        <div class="education-meta">
-            {% if entry.company %}
-            <span class="education-company">
-                {{ entry.company }}
-            </span>
-            {% endif %}
-
-            {% if entry.company and (entry.start or entry.end) %}
-            <span class="education-separator">|</span>
-            {% endif %}
-
-            {% if entry.start or entry.end %}
-            <span class="education-date">
-                {% if entry.start and entry.end and entry.end != entry.start %}
-                {{ entry.start }} — {{ entry.end }}
-                {% elif entry.start %}
-                {{ entry.start }}
-                {% else %}
-                {{ entry.end }}
-                {% endif %}
-            </span>
-            {% endif %}
-        </div>
-
-        {% if entry.description %}
-            <p class="education-description">
-            {{ entry.description }}
-            </p>
-        {% endif %}
-
+          <span class="education-entry-title">{{ entry.title }}</span>
+          {% if entry.company %}
+          <span class="education-entry-sep">—</span>
+          <span class="education-entry-company">{{ entry.company }}</span>
+          {% endif %}
+          {% if entry.start or entry.end %}
+          <span class="education-entry-sep">|</span>
+          <span class="education-entry-date">
+            {%- if entry.start and entry.end and entry.end != entry.start -%}
+              {{ entry.start }} — {{ entry.end }}
+            {%- elif entry.start -%}
+              {{ entry.start }}
+            {%- else -%}
+              {{ entry.end }}
+            {%- endif -%}
+          </span>
+          {% endif %}
         </article>
             {% endfor %}
           {% endif %}
@@ -128,7 +120,7 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
 
         {% if extra_education and extra_education|length > 0 %}
         <div class="extra-education">
-          <div class="extra-education-label">Cursos &amp; Aperfeiçoamentos</div>
+          <div class="h2-secondary">Cursos &amp; Aperfeiçoamentos</div>
           <div class="extra-education-tags">
             {% for item in extra_education %}
             <span class="extra-education-tag">
@@ -158,5 +150,30 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
       </section>
     </main>
   </div>
+
+  <script>
+    function copyEmailToClipboard(button) {
+      var email = button.getAttribute('data-email');
+      var feedback = button.nextElementSibling;
+
+      function showFeedback(message) {
+        if (feedback) {
+          feedback.textContent = message;
+          setTimeout(function () { feedback.textContent = ''; }, 2000);
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(function () {
+          showFeedback('copiado!');
+        }).catch(function () {
+          showFeedback('não foi possível copiar — selecione o texto manualmente');
+        });
+      } else {
+        // Fallback para navegadores sem Clipboard API (raro hoje em dia).
+        showFeedback('selecione o texto manualmente para copiar');
+      }
+    }
+  </script>
 </body>
 </html>

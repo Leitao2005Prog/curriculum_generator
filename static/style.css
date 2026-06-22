@@ -8,14 +8,42 @@
      calculados em src/page_check.py (compute_density). */
   --density-experience: 1;
   --density-side: 1;
+
+  /* --- PALETA DE CORES (VARIÁVEIS) --- */
+  --color-bg-main: #f2f2f2;
+  --color-bg-page: #fff;
+  --color-text-main: #151515;
+  --color-text-muted: #444;
+  --color-text-light: #888;
+  --color-text-soft: #151515;
+  
+  --color-topbar-bg: #1f192b;
+  --color-topbar-text: #fff;
+  --color-topbar-headline: rgba(255, 255, 255, 0.82);
+  --color-topbar-border: rgba(255, 255, 255, 0.9);
+  
+  --color-btn-text-dim: rgba(255, 255, 255, 0.65);
+  --color-btn-border-dim: rgba(255, 255, 255,1);
+  --color-btn-border-hover: rgba(255, 255, 255, 0.7);
+  --color-btn-feedback: rgba(255, 255, 255, 0.75);
+
+  --color-border-headline: rgb(113, 113, 113);
+  --color-border-primary: #1f192b;
+  --color-border-secondary: #d0d0d0;
+  --color-border-column: #d8d8d8;
+  --color-border-sep: #aaa;
+  
+  --color-tag-bg: #f2f2f2;
+  --color-tag-border: #e0e0e0;
+  --color-tag-text: #3a3a3a;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  background: #f2f2f2;
+  background: var(--color-bg-main);
   font-family: 'Poppins', Helvetica, sans-serif;
-  color: #151515;
+  color: var(--color-text-main);
 }
 
 body {
@@ -26,7 +54,7 @@ body {
   width: 210mm;
   height: 297mm;
   margin: 0 auto;
-  background: #fff;
+  background: var(--color-bg-page);
   overflow: hidden;
   position: relative;
   display: flex;
@@ -50,8 +78,8 @@ body {
   display: grid;
   grid-template-columns: 1.2fr 0.75fr;
   gap: 18px;
-  background: #1f192b;
-  color: #fff;
+  background: var(--color-topbar-bg);
+  color: var(--color-topbar-text);
   padding: 24px 18px 16px 18px;
   align-items: start;
 }
@@ -76,13 +104,13 @@ body {
   font-size: 11pt;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-topbar-headline);
   text-transform: uppercase;
 }
 
 .topbar-right {
   padding-top:20px;
-  border-left: 3px solid rgba(255,255,255,0.9);
+  border-left: 3px solid var(--color-topbar-border);
   padding-left: 16px;
   font-size: 8.7pt;
   line-height: 1.35;
@@ -97,12 +125,41 @@ body {
 }
 
 .contact-line a {
-  color: #fff;
+  color: var(--color-topbar-text);
   text-decoration: none;
 }
 
 .contact-line a:hover {
   text-decoration: underline;
+}
+
+/* Botão "copiar" ao lado do email: funciona como rede de segurança
+   quando o clique no mailto: não abre nada (ex: sistema sem cliente de
+   email configurado, que dispara erro de xdg-open no Linux). Só faz
+   sentido no HTML interativo — no PDF (estático, sem JS) ele é
+   escondido via @media print, e o texto do email permanece selecionável
+   normalmente. */
+.copy-email-btn {
+  font-family: inherit;
+  font-size: 7.5pt;
+  color: var(--color-btn-text-dim);
+  background: transparent;
+  border: 1px solid var(--color-btn-border-dim);
+  border-radius: 9px;
+  padding: 1px 7px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.copy-email-btn:hover {
+  color: var(--color-topbar-text);
+  border-color: var(--color-btn-border-hover);
+}
+
+.copy-email-feedback {
+  font-size: 7.5pt;
+  color: var(--color-btn-feedback);
+  font-style: italic;
 }
 
 /* Ícone monocromático branco (herda a cor do texto via currentColor),
@@ -114,7 +171,7 @@ body {
   flex-shrink: 0;
   width: 10px;
   height: 10px;
-  color: #fff;
+  color: var(--color-topbar-text);
 }
 
 .contact-icon svg {
@@ -124,15 +181,16 @@ body {
 }
 
 .headline {
-  padding: 10px 18px 8px 18px;
-  border-bottom: 1px solid #cfcfcf;
+  padding: 14px 18px 12px 18px;
+  border-bottom: 1px solid var(--color-border-headline);
 }
 
 .headline p {
   margin: 0;
   font-size: 12pt;
-  line-height: 1.25;
+  line-height: 1.4;
   font-weight: 700;
+  text-align: justify;
 }
 
 .layout {
@@ -142,13 +200,32 @@ body {
   padding: 12px 18px 18px 18px;
 }
 
+/* Título de seção primária: Experiências e Competências Técnicas */
 h2 {
   letter-spacing: 0.02em;
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   font-size: 13pt;
   line-height: 1.1;
   font-weight: 700;
   text-transform: uppercase;
+  border-bottom: 1.5px solid var(--color-border-primary);
+  padding-bottom: 4px;
+}
+
+/* Título de seção secundária: Formações Acadêmicas
+   Mesmo peso que h2 mas sem uppercase, cor mais suave, linha mais fina.
+   A diferença é sutil mas deliberada: Formações é contexto de apoio,
+   não a seção principal que um recrutador vai escanear primeiro. */
+.h2-secondary {
+  letter-spacing: 0.01em;
+  margin: 18px 0 8px 0;
+  font-size: 10.5pt;
+  line-height: 1.1;
+  font-weight: 700;
+  text-transform: none;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-secondary);
+  padding-bottom: 3px;
 }
 
 .experience-column {
@@ -157,8 +234,8 @@ h2 {
 
 .competency-column {
   min-width: 0;
-  padding-left: 18px;
-  border-left: 1px solid #d8d8d8;
+  padding-left: 15px;
+  border-left: 1px solid var(--color-border-column); 
 }
 
 .competency-list {
@@ -246,53 +323,52 @@ h2 {
   left: 0;
 }
 
-.education-title {
-  margin-top: 16px;
-  font-size: 10pt;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
+/* Formação acadêmica em linha única:
+   Título em negrito — Instituição | Datas, tudo numa linha.
+   Ocupa pouco espaço vertical e é escaneável em menos de 1 segundo. */
 .education-entry {
-  margin-bottom: 14px;
-}
-
-.education-line {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 10.5pt;
-  font-weight: 700;
-  line-height: 1.25;
+  align-items: baseline;
+  gap: 0;
+  flex-wrap: wrap;
+  margin-bottom: calc(7px * var(--density-experience));
+  font-size: 9.8pt;
+  line-height: 1.35;
 }
 
-.education-company {
+.education-entry-title {
+  font-weight: 700;
+  color: var(--color-text-main);
   white-space: nowrap;
 }
 
-.education-date {
-  margin-top: 4px;
-  font-size: 9.8pt;
-  line-height: 1.2;
+.education-entry-sep {
+  color: var(--color-border-sep);
+  margin: 0 5px;
+  font-weight: 400;
 }
 
-.education-description {
-  margin: 6px 0 0 0;
-  font-size: 9.4pt;
-  line-height: 1.3;
+.education-entry-company {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.education-entry-date {
+  color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .extra-education {
-  margin-top: calc(14px * var(--density-side));
+  margin-top: calc(12px * var(--density-side));
 }
 
 .extra-education-label {
-  font-size: 8.7pt;
-  font-weight: 700;
+  font-size: 7.8pt;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #6b6b6b;
-  margin-bottom: 6px;
+  letter-spacing: 0.06em;
+  color: var(--color-text-soft);
+  margin-bottom: 5px;
 }
 
 .extra-education-tags {
@@ -304,9 +380,9 @@ h2 {
 .extra-education-tag {
   font-size: 8.6pt;
   line-height: 1.3;
-  background: #f2f2f2;
-  border: 1px solid #e0e0e0;
-  color: #3a3a3a;
+  background: var(--color-tag-bg);
+  border: 1px solid var(--color-tag-border);
+  color: var(--color-tag-text);
   padding: 4px 9px;
   border-radius: 11px;
 }
@@ -314,12 +390,17 @@ h2 {
 @media print {
   body {
     padding: 0;
-    background: #fff;
+    background: var(--color-bg-page);
   }
 
   .page {
     width: 210mm;
     height: 297mm;
+  }
+
+  .copy-email-btn,
+  .copy-email-feedback {
+    display: none;
   }
 
   @page {
