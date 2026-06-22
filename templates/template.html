@@ -23,27 +23,35 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;
       </div>
 
       <div class="topbar-right">
-        {% for c in contacts %}
-        <div class="contact-line">
-          <span class="contact-icon">{{ c.icon | safe }}</span>
-          {% if c.href %}
-          <a href="{{ c.href }}" target="_blank" rel="noopener">{{ c.text }}</a>
-          {% else %}
-          <span>{{ c.text }}</span>
-          {% endif %}
-          {% if c.key == "email" %}
-          <button
-            type="button"
-            class="copy-email-btn"
-            data-email="{{ c.text }}"
-            title="Copiar email"
-            onclick="copyEmailToClipboard(this)"
-          >copiar</button>
-          <span class="copy-email-feedback" aria-live="polite"></span>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
+  {% for c in contacts %}
+    <div class="contact-line contact-line-{{ c.key }}">
+      <span class="contact-icon">{{ c.icon | safe }}</span>
+
+      {% if c.href %}
+      <a href="{{ c.href }}" target="_blank" rel="noopener" class="contact-link">
+        <span class="contact-text">{{ c.text }}</span>
+
+        {% if c.cta %}
+        <span class="contact-cta">{{ c.cta }}</span>
+        {% endif %}
+      </a>
+      {% else %}
+      <span class="contact-text">{{ c.text }}</span>
+      {% endif %}
+
+      {% if c.key == "phone" %}
+      <button
+        type="button"
+        class="copy-phone-btn"
+        data-phone="{{ c.text }}"
+        title="Copiar telefone"
+        onclick="copyPhoneToClipboard(this)"
+      >copiar</button>
+      <span class="copy-phone-feedback" aria-live="polite"></span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
     </header>
 
     <section class="headline">

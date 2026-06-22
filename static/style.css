@@ -85,7 +85,7 @@ body {
 }
 
 .topbar-left {
-  padding-right: 28px;
+  padding-right: 24px;
 }
 
 .topbar-left h1 {
@@ -112,7 +112,7 @@ body {
   padding-top:20px;
   border-left: 3px solid var(--color-topbar-border);
   padding-left: 16px;
-  font-size: 8.7pt;
+  font-size: 8pt;
   line-height: 1.35;
 }
 
@@ -398,8 +398,8 @@ h2 {
     height: 297mm;
   }
 
-  .copy-email-btn,
-  .copy-email-feedback {
+  .copy-phone-btn,
+  .copy-phone-feedback {
     display: none;
   }
 
@@ -407,4 +407,65 @@ h2 {
     size: A4;
     margin: 0;
   }
+}
+
+.contact-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  word-break: break-word;
+  flex-wrap: wrap;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--color-topbar-text);
+  text-decoration: none;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+.contact-text {
+  min-width: 0;
+}
+
+.contact-cta {
+  font-size: 7.6pt;
+  color: var(--color-btn-feedback);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.contact-link:hover .contact-cta {
+  color: var(--color-topbar-text);
+}
+
+.copy-phone-btn {
+  font-family: inherit;
+  font-size: 7.5pt;
+  color: var(--color-btn-text-dim);
+  background: transparent;
+  border: 1px solid var(--color-btn-border-dim);
+  border-radius: 9px;
+  padding: 1px 7px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.copy-phone-btn:hover {
+  color: var(--color-topbar-text);
+  border-color: var(--color-btn-border-hover);
+}
+
+.copy-phone-feedback {
+  font-size: 7.5pt;
+  color: var(--color-btn-feedback);
+  font-style: italic;
 }

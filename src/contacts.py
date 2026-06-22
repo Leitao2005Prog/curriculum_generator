@@ -20,15 +20,9 @@ def _normalize_value(ctx, key):
 def build_contacts(ctx):
     """
     Devolve a lista de contatos prontos para o template, cada um como:
-        {"key": ..., "icon": <svg>, "text": ..., "href": ... ou None}
+        {"key": ..., "icon": <svg>, "text": ..., "href": ... ou None, "cta": ...}
 
     Itens sem valor no YAML são omitidos automaticamente.
-
-    O texto exibido (`text`) é sempre o valor original do YAML (endereço,
-    telefone, o email em si, ou a URL por extenso de linkedin/github) —
-    nunca um link "técnico" como mailto:...?subject=... mesmo quando o
-    `href` por trás é mais elaborado (caso do email, que vira um mailto:
-    com assunto pré-preenchido).
     """
     contacts = []
 
@@ -39,18 +33,24 @@ def build_contacts(ctx):
 
         href = contact_type["make_href"](value, ctx)
 
-        # linkedin/github mostram a URL completa como texto (decisão de
-        # design já validada); os demais mostram o valor original do YAML.
         if href and contact_type["key"] in ("linkedin", "github"):
             text = href
         else:
             text = value
+
+        if contact_type["key"] == "email":
+            cta = "contato →"
+        elif contact_type["key"] == "github":
+            cta = "projetos →"
+        else:
+            cta = ""
 
         contacts.append({
             "key": contact_type["key"],
             "icon": contact_type["icon"],
             "text": text,
             "href": href,
+            "cta": cta,
         })
 
     return contacts

@@ -11,7 +11,6 @@ Para adicionar um novo tipo de contato no futuro (ex: site pessoal,
 WhatsApp), basta adicionar uma entrada nova em CONTACT_TYPES — nenhum
 outro módulo precisa mudar.
 """
-from urllib.parse import quote
 from urllib.parse import urlencode, quote
 
 # Ícones SVG simples, estilo outline, viewBox 24x24.
@@ -51,6 +50,7 @@ def _email_href(value: str, ctx: dict):
     }
 
     return "https://mail.google.com/mail/?" + urlencode(params, quote_via=quote)
+
 
 def _linkedin_href(value: str, ctx: dict):
     """Aceita tanto 'in/usuario' quanto a URL completa já pronta no YAML."""
