@@ -5,3 +5,5 @@ build/
 *.yaml
 *.exe
 *.pyc
+*.pdf
+*.html

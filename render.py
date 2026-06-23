@@ -11,6 +11,7 @@ ordem das chamadas. Veja:
     src/icons.py      -> registro de ícones SVG por tipo de contato
     src/text_utils.py -> utilitários de texto (parágrafos/bullets)
     src/page_check.py -> estimativa de overflow de página A4
+    src/pdf_export.py -> exportação do HTML final para PDF (via Playwright)
 """
 import sys
 from pathlib import Path
@@ -29,11 +30,13 @@ from yaml_io import load_yaml, resolve_placeholders  # noqa: E402
 from selection import apply_selection  # noqa: E402
 from context import prepare_context  # noqa: E402
 from page_check import check_overflow, print_overflow_warning, compute_density  # noqa: E402
+from pdf_export import export_pdf  # noqa: E402
 
 MASTER_RESUME = INPUT_DIR / "master_resume.yaml"
 SELECTION = INPUT_DIR / "selection.yaml"
 SECRETS = INPUT_DIR / "secrets.yaml"
 OUTPUT_HTML = OUTPUT_DIR / "resume.html"
+OUTPUT_PDF = OUTPUT_DIR / "resume.pdf"
 TEMPLATE_NAME = "template.html"
 
 
@@ -78,6 +81,9 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_HTML.write_text(html, encoding="utf-8")
     print(f"HTML gerado em: {OUTPUT_HTML}")
+
+    if export_pdf(OUTPUT_HTML, OUTPUT_PDF):
+        print(f"PDF gerado em: {OUTPUT_PDF}")
 
 
 if __name__ == "__main__":
