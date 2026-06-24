@@ -8,24 +8,7 @@ para garantir um layout A4 perfeito.
 """
 import sys
 
-# --- CONFIGURAÇÃO GLOBAL DE PESOS TÉCNICOS (TIERS) ---
-# Evita que ferramentas mundanas como Word roubem o lugar de Java/Python
-TIER_WEIGHTS = {
-    # Tier 1: Peso Máximo (Core Tech, Engenharia de Dados, Backend)
-    "java": 50, "python": 50, "mysql": 50, "pandas": 50, "powerbi": 50, 
-    "sql": 50, "backend": 50, "dados": 50, "bi": 50,
-    
-    # Tier 2: Peso Alto (Infraestrutura, DevOps, Automações e Core Web)
-    "docker": 35, "git": 35, "github": 35, "linux": 35, "n8n": 35, 
-    "arduino": 35, "esp32": 35, "html": 35, "css": 35, "javascript": 35, 
-    "js": 35, "selenium": 35, "pyautogui": 35, "rpa": 35, "automação": 35,
-    
-    # Tier 3: Peso Médio (Design Gráfico e UI/UX)
-    "photoshop": 20, "illustrator": 20, "indesign": 20, "design": 20, "ui/ux": 20,
-    
-    # Tier 4: Peso Baixo (Utilitários de escritório gerais)
-    "word": 5, "powerpoint": 5, "office": 5
-}
+
 
 # --- LIMITES RÍGIDOS PARA O LAYOUT A4 PERFEITO ---
 MAX_EXPERIENCES = 3
@@ -33,15 +16,30 @@ MAX_SKILLS = 15
 MAX_EXTRA_EDUCATION = 2
 
 
-def get_item_tier_weight(name, tags):
-    """Descobre o maior peso em nível associado ao nome ou às tags do elemento."""
-    max_w = 5  # Fallback padrão (Tier mais baixo)
+def get_item_tier_weight(name, tags, master_data):
+    """
+    Descobre o peso do item buscando suas tags ou nome dentro do 'tier_config'
+    que agora foi movido para o YAML.
+    """
+    # Busca a configuração que mudamos para o YAML. Se não existir, usa um fallback seguro
+    tier_config = master_data.get("tier_config", {})
+    
+    # Se não houver configuração nenhuma no YAML, mantém os pesos padrão
+    t1 = tier_config.get("tier_1", ["java", "python", "mysql", "sql", "dados", "backend"])
+    t2 = tier_config.get("tier_2", ["docker", "git", "linux", "html", "automação"])
+    t3 = tier_config.get("tier_3", ["photoshop", "design", "ui/ux"])
+    
     tokens = [name.lower()] + [t.lower() for t in (tags or [])]
     
+    max_w = 5  # Fallback padrão (Tier 4)
     for token in tokens:
-        for key, weight in TIER_WEIGHTS.items():
-            if key in token and weight > max_w:
-                max_w = weight
+        for t_word in t1:
+            if t_word in token: return 50
+        for t_word in t2:
+            if t_word in token: return 35
+        for t_word in t3:
+            if t_word in token: return 20
+            
     return max_w
 
 
@@ -84,45 +82,56 @@ def resolve_description(master, vaga_lower):
 
 
 def resolve_skills(master, vaga_lower):
-    """Seleciona as melhores competências, ordena por relevância e agrupa por seção."""
+    """
+    Seleciona as competências. Grupos VIPs (como Idiomas) cortam a fila,
+    não consomem o limite do MAX_SKILLS e são jogados para o final do bloco.
+    """
     bank = master.get("skills_bank") or []
-    scored_skills = []
+    always_include = master.get("always_include_groups", ["Idiomas"])
     
+    mandatory_skills = []
+    pool_skills = []
+    
+    # 1. Triagem Inicial
     for skill in bank:
-        name = skill.get("name", "")
-        tags = skill.get("tags", [])
+        group = skill.get("group", "Outros")
         
-        tier_weight = get_item_tier_weight(name, tags)
-        match_score = calculate_match_score(vaga_lower, name, tags)
-        
-        # Pontuação Final: O match tem precedência absoluta, mas o Tier desempata
-        final_score = match_score + tier_weight
-        
-        scored_skills.append({
-            "skill": skill,
-            "score": final_score,
-            "group": skill.get("group", "Outros")
-        })
-        
-    # Ordena do maior score para o menor
-    scored_skills.sort(key=lambda x: x["score"], reverse=True)
+        if group in always_include:
+            mandatory_skills.append(skill)
+        else:
+            name = skill.get("name", "")
+            tags = skill.get("tags", [])
+            
+            tier_weight = get_item_tier_weight(name, tags, master)
+            match_score = calculate_match_score(vaga_lower, name, tags)
+            final_score = match_score + tier_weight
+            
+            pool_skills.append({
+                "skill": skill,
+                "score": final_score,
+                "group": group
+            })
+            
+    # 2. Ordena o pool técnico restante por relevância
+    pool_skills.sort(key=lambda x: x["score"], reverse=True)
     
-    # Aplica a trava de segurança física de quantidade
-    top_skills = scored_skills[:MAX_SKILLS]
+    # 3. Seleção: Techs entram primeiro e as Mandatórias (Idiomas) fecham a lista!
+    selected_pool = [item["skill"] for item in pool_skills[:MAX_SKILLS]]
+    final_selection = selected_pool + mandatory_skills  # 👈 Invertido aqui!
     
-    # Agrupa mantendo a ordem de relevância dos grupos detectados
+    print(f"[selection] Total renderizado: {len(final_selection)} (Techs: {len(selected_pool)} | VIPs: {len(mandatory_skills)})")
+    
+    # 4. Agrupa para o Jinja2 manter a ordem correta dos blocos no HTML
     groups_order = []
     groups = {}
-    
-    for item in top_skills:
-        g_title = item["group"]
+    for skill in final_selection:
+        g_title = skill.get("group", "Outros")
         if g_title not in groups:
             groups[g_title] = []
             groups_order.append(g_title)
-        groups[g_title].append(item["skill"].get("name", ""))
+        groups[g_title].append(skill.get("name", ""))
         
     return [{"title": title, "items": groups[title]} for title in groups_order]
-
 
 def resolve_experiences(master, vaga_lower):
     """Escolhe as 3 melhores experiências com base nos matches dos sub-bullets e tags."""
@@ -182,7 +191,7 @@ def resolve_extra_education(master, vaga_lower):
     for item in bank:
         title = item.get("title", "")
         tags = item.get("tags", [])
-        score = calculate_match_score(vaga_lower, title, tags) + get_item_tier_weight(title, tags)
+        score = calculate_match_score(vaga_lower, title, tags) + get_item_tier_weight(title, tags,master)
         
         scored_courses.append({
             "score": score,
