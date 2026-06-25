@@ -28,6 +28,16 @@ OUTPUT_HTML = OUTPUT_DIR / "resume.html"
 OUTPUT_PDF = OUTPUT_DIR / "resume.pdf"
 TEMPLATE_NAME = "template.html"
 
+import re
+from unicodedata import normalize
+
+def slugify(text):
+    """Transforma qualquer string em um nome de arquivo seguro (sem acentos ou espaços)"""
+    text = normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    text = text.lower().strip()
+    text = re.sub(r'[^a-z0-9\s_-]', '', text)
+    text = re.sub(r'[\s_-]+', '_', text)
+    return text
 
 def main():
     # AQUI ESTÁ A MÁGICA: O Python monta o quebra-cabeça dos arquivos para você
@@ -75,12 +85,31 @@ def main():
     template = env.get_template(TEMPLATE_NAME)
     html = template.render(**context)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_HTML.write_text(html, encoding="utf-8")
-    print(f"HTML gerado em: {OUTPUT_HTML}")
 
-    if export_pdf(OUTPUT_HTML, OUTPUT_PDF):
-        print(f"PDF gerado em: {OUTPUT_PDF}")
+
+    # Nome personalizado 
+    user_name = master.get("full_name", "place_holder")
+    cargo_foco = master.get("headline_title", "Desenvolvedor") 
+
+    # 2. Gera os nomes de arquivos limpos e seguros
+    base_name = f"{slugify(user_name)}_{slugify(cargo_foco)}"
+    
+    # 3. Monta os caminhos (Path) finais apontando para a pasta output/
+    dinamico_html = OUTPUT_DIR / f"{base_name}.html"
+    dinamico_pdf = OUTPUT_DIR / f"{base_name}.pdf"
+
+    # 4. Garante que a pasta output/ exista
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # 5. Salva o HTML com o nome dinâmico
+    dinamico_html.write_text(html, encoding="utf-8")
+    print(f"[render] HTML gerado em: {dinamico_html}")
+
+    # 6. Exporta o PDF passando os caminhos dinâmicos corretos
+    if export_pdf(dinamico_html, dinamico_pdf):
+        print(f"[render] PDF profissional gerado com sucesso em: {dinamico_pdf}")
+    else:
+        print("[render] Erro crítico na exportação do PDF.")
 
 
 if __name__ == "__main__":
